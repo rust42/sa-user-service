@@ -9,6 +9,9 @@ jobs:
     with: "Auth"
   deploy_to_staging:
     uses: rust42/SA-Final-Project-Manifests/.github/workflows/DeployStaging.yaml@main
+    secrets: inherit
+    with: "Auth"
+
 
 
 
