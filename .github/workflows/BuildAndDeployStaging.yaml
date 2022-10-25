@@ -4,7 +4,7 @@ on:
 
 jobs:
   create_docker_image:
-    uses: ./.github/workflows/BuildDockerImage.yaml@main
+    uses: ./.github/workflows/BuildDockerImage.yaml
     secrets: inherit
     with: "Auth"
   deploy_to_staging:
