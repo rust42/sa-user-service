@@ -7,6 +7,9 @@ jobs:
     uses: ./.github/workflows/BuildDockerImage.yml
   deploy_to_staging:
     uses: rust42/SA-Final-Project-Manifests/.github/workflows/DeployStaging.yaml@main
+    with:
+      environment: Development
+
 
 
 
