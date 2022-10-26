@@ -3,9 +3,11 @@ package edu.miu.cs590.userservice.dto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @NoArgsConstructor
-public class UserDto {
+public class UserDto  {
     private Long id;
     private String email;
     private String firstName;

@@ -12,7 +12,9 @@ import edu.miu.cs590.userservice.repository.UserRepository;
 import edu.miu.cs590.userservice.service.UserService;
 import edu.miu.cs590.userservice.util.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,6 +26,10 @@ import java.util.Optional;
 @Service
 @Transactional(rollbackFor = {Exception.class})
 public class UserServiceImpl implements UserService {
+
+
+    @Value("${user.auth-info.service.kafka.topic}")
+    private String userTopic;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -37,6 +43,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
+
+    @Autowired
+    private KafkaTemplate<String, UserDto> kafkaTemplate;
 
     public TokenDto authenticate(LoginCredentialDto credentials) {
         Optional<User> optionalUser = userRepository.findByEmail(credentials.getEmail());
@@ -60,19 +69,23 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    public UserServiceImpl(UserSaveMapper userSaveMapper,UserRepository userRepository) {
-        this.userSaveMapper=userSaveMapper;
-        this.userRepository=userRepository;
+    public UserServiceImpl(UserSaveMapper userSaveMapper, UserRepository userRepository) {
+        this.userSaveMapper = userSaveMapper;
+        this.userRepository = userRepository;
     }
 
     @Override
     public UserDto saveUser(UserSaveDto userSaveDto) {
-        userRepository.findByEmail(userSaveDto.getEmail()).ifPresent(user -> {throw new UserAlreadyExistException("Email "+user.getEmail()+ " already exist!");});
-        return userSaveMapper.toDto(userRepository.save(userSaveMapper.toEntity(userSaveDto)));
+        userRepository.findByEmail(userSaveDto.getEmail()).ifPresent(user -> {
+            throw new UserAlreadyExistException("Email " + user.getEmail() + " already exist!");
+        });
+        UserDto userDto = userSaveMapper.toDto(userRepository.save(userSaveMapper.toEntity(userSaveDto)));
+        kafkaTemplate.send(userTopic, userDto);
+        return userDto;
     }
 
     @Override
-    public Boolean checkUser(String email){
+    public Boolean checkUser(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
 }
