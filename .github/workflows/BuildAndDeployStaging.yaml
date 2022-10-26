@@ -1,0 +1,16 @@
+name: Build and deploy to Staging environment
+on:
+  workflow_dispatch:
+
+jobs:
+  create_docker_image:
+    uses: ./.github/workflows/BuildDockerImage.yml
+  deploy_to_staging:
+    needs: create_docker_image
+    uses: rust42/SA-Final-Project-Manifests/.github/workflows/DeployStaging.yaml@main
+    secrets: inherit
+
+
+
+
+
